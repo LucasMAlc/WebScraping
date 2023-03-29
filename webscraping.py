@@ -12,6 +12,7 @@ import datetime
 ts1 = 2
 ts2 = 2
 ts3 = 2
+SCROLL_PAUSE_TIME = 1.5
 
 # Define as opções do navegador  e inicia o Google Chrome
 
@@ -94,65 +95,121 @@ driver.find_element(By.XPATH, '//*[@id="jserp-filters"]/ul/li[5]/div/div/div/but
 x = 1
 jobs_list = []
 horario = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+# Scrollar a página para atualizar as vagas
+last_height = driver.execute_script("return document.body.scrollHeight")
 
 while True:
-    time.sleep(1)
-    driver.find_element(By.XPATH, f'//*[@id="main-content"]/section/ul/li[{x}]/div/a').click()
-    time.sleep(5)
-    try:
-        job_dict = {}
+    time.sleep(0.5)
+    try: 
+        driver.find_element(By.XPATH, f'//*[@id="main-content"]/section/ul/li[{x}]/div/a').click()
+        time.sleep(2)
         try:
-            job_dict['url'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/section/div/div[1]/div/a').get_attribute('href')
-        except NoSuchElementException:
-            job_dict['url'] = 'NULL'
-        try:
-            job_dict['titulo'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/section/div/div[1]/div/a/h2').text
-        except NoSuchElementException:
-            job_dict['titulo'] = 'NULL'
-        try:
-            job_dict['empresa'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/section/div/div[1]/div/h4/div[1]/span[1]/a').text
-        except NoSuchElementException:
-            job_dict['empresa'] = 'NULL'
-        try:
-            job_dict['url_empresa'] = driver.find_element(By.XPATH, '//html/body/div[1]/div/section/div[2]/section/div/div[1]/div/h4/div[1]/span[1]/a').get_attribute('href')
-        except NoSuchElementException:
-            job_dict['url_empresa'] = 'NULL'
-        try:
-            job_dict['tipo_contrato'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/div/section[1]/div/ul/li[2]/span')\
-            .text.split('\n')[0]
-        except NoSuchElementException:
-            job_dict['tipo_contrato'] = 'NULL'
-        try:
-            job_dict['experiencia'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/div/section[1]/div/ul/li[1]/span')\
-            .text.split('\n')[0]
-        except NoSuchElementException:
-            job_dict['experiencia']= 'NULL'
-        try:
-            job_dict['candidatos'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/section/div/div[1]/div/h4/div[2]/span[2]')\
-            .text.split(' ')[0]
-        except NoSuchElementException:
-            job_dict['candidatos'] = 'NULL'
-        try:
-            job_dict['postado'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/section/div/div[1]/div/h4/div[2]/span[1]').text
-        except NoSuchElementException:
-            job_dict['postado'] = 'NULL'
-        try:
-            job_dict['horario'] = horario
-        except NoSuchElementException:
-            job_dict['horario'] = 'NULL'
+            job_dict = {}
+            try:
+                job_dict['url'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/section/div/div[1]/div/a').get_attribute('href')
+            except NoSuchElementException:
+                job_dict['url'] = 'NULL'
+            try:
+                job_dict['titulo'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/section/div/div[1]/div/a/h2').text
+            except NoSuchElementException:
+                job_dict['titulo'] = 'NULL'
+            try:
+                job_dict['empresa'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/section/div/div[1]/div/h4/div[1]/span[1]/a').text
+            except NoSuchElementException:
+                job_dict['empresa'] = 'NULL'
+            try:
+                job_dict['url_empresa'] = driver.find_element(By.XPATH, '//html/body/div[1]/div/section/div[2]/section/div/div[1]/div/h4/div[1]/span[1]/a').get_attribute('href')
+            except NoSuchElementException:
+                job_dict['url_empresa'] = 'NULL'
+            try:
+                job_dict['tipo_contrato'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/div/section[1]/div/ul/li[2]/span')\
+                .text.split('\n')[0]
+            except NoSuchElementException:
+                job_dict['tipo_contrato'] = 'NULL'
+            try:
+                job_dict['experiencia'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/div/section[1]/div/ul/li[1]/span')\
+                .text.split('\n')[0]
+            except NoSuchElementException:
+                job_dict['experiencia']= 'NULL'
+            try:
+                job_dict['candidatos'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/section/div/div[1]/div/h4/div[2]/span[2]')\
+                .text.split(' ')[0]
+            except NoSuchElementException:
+                job_dict['candidatos'] = 'NULL'
+            try:
+                job_dict['postado'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/section/div/div[1]/div/h4/div[2]/span[1]').text
+            except NoSuchElementException:
+                job_dict['postado'] = 'NULL'
+            try:
+                job_dict['horario'] = horario
+            except NoSuchElementException:
+                job_dict['horario'] = 'NULL'
 
-        jobs_list.append(job_dict)
+            jobs_list.append(job_dict)
+        except NoSuchElementException:
+            continue
+# Há no site alguns xpath diferentes por isso essa parte do código
+    except NoSuchElementException:
+        driver.find_element(By.XPATH, f'//*[@id="main-content"]/section/ul/li[{x}]/a').click()
+        time.sleep(2)
+        try:
+            job_dict = {}
+            try:
+                job_dict['url'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/section/div/div[1]/div/a').get_attribute('href')
+            except NoSuchElementException:
+                job_dict['url'] = 'NULL'
+            try:
+                job_dict['titulo'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/section/div/div[1]/div/a/h2').text
+            except NoSuchElementException:
+                job_dict['titulo'] = 'NULL'
+            try:
+                job_dict['empresa'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/section/div/div[1]/div/h4/div[1]/span[1]/a').text
+            except NoSuchElementException:
+                job_dict['empresa'] = 'NULL'
+            try:
+                job_dict['url_empresa'] = driver.find_element(By.XPATH, '//html/body/div[1]/div/section/div[2]/section/div/div[1]/div/h4/div[1]/span[1]/a').get_attribute('href')
+            except NoSuchElementException:
+                job_dict['url_empresa'] = 'NULL'
+            try:
+                job_dict['tipo_contrato'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/div/section[1]/div/ul/li[2]/span')\
+                .text.split('\n')[0]
+            except NoSuchElementException:
+                job_dict['tipo_contrato'] = 'NULL'
+            try:
+                job_dict['experiencia'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/div/section[1]/div/ul/li[1]/span')\
+                .text.split('\n')[0]
+            except NoSuchElementException:
+                job_dict['experiencia']= 'NULL'
+            try:
+                job_dict['candidatos'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/section/div/div[1]/div/h4/div[2]/span[2]')\
+                .text.split(' ')[0]
+            except NoSuchElementException:
+                job_dict['candidatos'] = 'NULL'
+            try:
+                job_dict['postado'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/section/div/div[1]/div/h4/div[2]/span[1]').text
+            except NoSuchElementException:
+                job_dict['postado'] = 'NULL'
+            try:
+                job_dict['horario'] = horario
+            except NoSuchElementException:
+                job_dict['horario'] = 'NULL'
+        except NoSuchElementException:
+            continue
+    html = driver.find_element(By.TAG_NAME, 'html')
+    html.send_keys(Keys.END)
+    time.sleep(SCROLL_PAUSE_TIME)
+    try:
+        driver.find_element(By.XPATH, '//*[@id="main-content"]/section[2]/button').click()
+        time.sleep(SCROLL_PAUSE_TIME)
     except NoSuchElementException:
         continue
-    driver.execute_script(f"window.scrollTo(0, {x*150});")
-    time.sleep(0.5)
     if x == int(driver.find_element(By.XPATH, '//*[@id="main-content"]/div/h1/span[1]').text): # interrompe o loop se x é igual ao número de vagas
         break
 
     x += 1
 
 # Exporta os resultados para um arquivo CSV
-filename = f'scraping-Horario_{horario}.csv'
+filename = f'Scraping - Lucas Moura Alcantara.csv'
 with open(filename, 'w', newline='', encoding='utf-8') as f:
     writer = csv.DictWriter(f, fieldnames=['url', 'titulo', 'empresa', 'url_empresa',             'tipo_contrato','experiencia', 'candidatos', 'postado','horario'])
     writer.writeheader()
