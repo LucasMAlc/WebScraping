@@ -12,7 +12,7 @@ import datetime
 ts1 = 2
 ts2 = 2
 ts3 = 2
-SCROLL_PAUSE_TIME = 1.5
+SCROLL_PAUSE_TIME = 0.5
 
 # Define as opções do navegador  e inicia o Google Chrome
 
@@ -95,14 +95,12 @@ driver.find_element(By.XPATH, '//*[@id="jserp-filters"]/ul/li[5]/div/div/div/but
 x = 1
 jobs_list = []
 horario = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-# Scrollar a página para atualizar as vagas
-last_height = driver.execute_script("return document.body.scrollHeight")
 
 while True:
-    time.sleep(0.5)
+    time.sleep(1)
     try: 
         driver.find_element(By.XPATH, f'//*[@id="main-content"]/section/ul/li[{x}]/div/a').click()
-        time.sleep(2)
+        time.sleep(1)
         try:
             job_dict = {}
             try:
@@ -151,7 +149,7 @@ while True:
 # Há no site alguns xpath diferentes por isso essa parte do código
     except NoSuchElementException:
         driver.find_element(By.XPATH, f'//*[@id="main-content"]/section/ul/li[{x}]/a').click()
-        time.sleep(2)
+        time.sleep(1)
         try:
             job_dict = {}
             try:
@@ -198,11 +196,12 @@ while True:
     html = driver.find_element(By.TAG_NAME, 'html')
     html.send_keys(Keys.END)
     time.sleep(SCROLL_PAUSE_TIME)
-    try:
-        driver.find_element(By.XPATH, '//*[@id="main-content"]/section[2]/button').click()
-        time.sleep(SCROLL_PAUSE_TIME)
-    except NoSuchElementException:
-        continue
+
+    # Clica no 'ver mais vagas' caso estava aparecendo
+    btn = driver.find_element(By.XPATH, '//*[@id="main-content"]/section[2]/button')
+    if btn.is_displayed():
+        btn.click()
+
     if x == int(driver.find_element(By.XPATH, '//*[@id="main-content"]/div/h1/span[1]').text): # interrompe o loop se x é igual ao número de vagas
         break
 
