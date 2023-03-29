@@ -7,6 +7,7 @@ import csv
 import time
 import datetime
 
+# Nesse código foi utilizado o selenium em sua última versão e o webdriver do Chrome (No código se encontra o Firefox comentado, mas não realizei nenhum teste com ele)
 
 # Define as opções do navegador  e inicia o Google Chrome
 
@@ -29,6 +30,7 @@ driver = webdriver.Chrome(options=options)
 url = 'https://www.linkedin.com/jobs/search'
 pais = 'Br'
 setor = 'Marketing e Publicidade'
+# É possível aplicar outros filtros caso saiba a ID
 tipo_contratacao = ['f_JT-0']
 nivel_experiencia = ['f_E-0']
 
@@ -47,7 +49,7 @@ for char in pais:
 time.sleep(1)
 
 country_filter.send_keys(Keys.ENTER)
-time.sleep(2)
+time.sleep(1)
 
 # Adiciona filtro de setor da empresa
 department_filter = driver.find_element(By.XPATH, '//*[@id="job-search-bar-keywords"]')
@@ -57,11 +59,11 @@ for char in setor:
     department_filter.send_keys(char)
     time.sleep(0.3)
 
-time.sleep(3)
+time.sleep(2)
 
 # Pesquisa por país e cargo
 department_filter.send_keys(Keys.ENTER)
-time.sleep(2)
+time.sleep(1)
 
 # Adiciona filtro de tipo de vaga e experiência
 employment_filter = driver.find_element(By.XPATH, '//*[@id="jserp-filters"]/ul/li[4]/div/div/button')
@@ -80,18 +82,19 @@ for nivel in nivel_experiencia:
     search_experience = driver.find_element(By.XPATH, f'//*[@id="{nivel}"]')
     search_experience.click()
 
-time.sleep(3)
+time.sleep(1)
 driver.find_element(By.XPATH, '//*[@id="jserp-filters"]/ul/li[5]/div/div/div/button').click()
 
 
 # Armazena as informações das vagas em uma lista de dicionários
 x = 1
 jobs_list = []
+horario = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 
-time.sleep(1)
 while True:
+    time.sleep(1)
     driver.find_element(By.XPATH, f'//*[@id="main-content"]/section/ul/li[{x}]/div/a').click()
-    time.sleep(5)
+    time.sleep(4)
     try:
         job_dict = {}
         try:
@@ -99,51 +102,55 @@ while True:
         except NoSuchElementException:
             job_dict['url'] = 'NULL'
         try:
-            job_dict['title'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/section/div/div[1]/div/a/h2').text
+            job_dict['titulo'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/section/div/div[1]/div/a/h2').text
         except NoSuchElementException:
-            job_dict['title'] = 'NULL'
+            job_dict['titulo'] = 'NULL'
         try:
-            job_dict['company'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/section/div/div[1]/div/h4/div[1]/span[1]/a').text
+            job_dict['empresa'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/section/div/div[1]/div/h4/div[1]/span[1]/a').text
         except NoSuchElementException:
-            job_dict['company'] = 'NULL'
+            job_dict['empresa'] = 'NULL'
         try:
-            job_dict['company_url'] = driver.find_element(By.XPATH, '//html/body/div[1]/div/section/div[2]/section/div/div[1]/div/h4/div[1]/span[1]/a').get_attribute('href')
+            job_dict['url_empresa'] = driver.find_element(By.XPATH, '//html/body/div[1]/div/section/div[2]/section/div/div[1]/div/h4/div[1]/span[1]/a').get_attribute('href')
         except NoSuchElementException:
-            job_dict['company_url'] = 'NULL'
+            job_dict['url_empresa'] = 'NULL'
         try:
-            job_dict['employment_type'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/div/section[1]/div/ul/li[2]/span')\
+            job_dict['tipo_contrato'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/div/section[1]/div/ul/li[2]/span')\
             .text.split('\n')[0]
         except NoSuchElementException:
-            job_dict['employment_type'] = 'NULL'
+            job_dict['tipo_contrato'] = 'NULL'
         try:
-            job_dict['experience_level'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/div/section[1]/div/ul/li[1]/span')\
+            job_dict['experiencia'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/div/section[1]/div/ul/li[1]/span')\
             .text.split('\n')[0]
         except NoSuchElementException:
-            job_dict['experience_level']= 'NULL'
+            job_dict['experiencia']= 'NULL'
         try:
-            job_dict['num_applicants'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/section/div/div[1]/div/h4/div[2]/span[2]')\
+            job_dict['candidatos'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/section/div/div[1]/div/h4/div[2]/span[2]')\
             .text.split(' ')[0]
         except NoSuchElementException:
-            job_dict['num_applicants'] = 'NULL'
+            job_dict['candidatos'] = 'NULL'
         try:
-            job_dict['post_date'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/section/div/div[1]/div/h4/div[2]/span[1]').text
+            job_dict['postado'] = driver.find_element(By.XPATH, '/html/body/div[1]/div/section/div[2]/section/div/div[1]/div/h4/div[2]/span[1]').text
         except NoSuchElementException:
-            job_dict['post_date'] = 'NULL'
+            job_dict['postado'] = 'NULL'
+        try:
+            job_dict['horario'] = horario
+        except NoSuchElementException:
+            job_dict['horario'] = 'NULL'
 
         jobs_list.append(job_dict)
     except NoSuchElementException:
         continue
-
+    driver.execute_script(f"window.scrollTo(0, {x*100});")
+    time.sleep(0.5)
     if x+1 is None: # interrompe o loop se x+1 é None
-        break  
+        break 
 
     x += 1
 
 # Exporta os resultados para um arquivo CSV
-current_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-filename = f'scraping-Horario_{current_time}.csv'
+filename = f'scraping-Horario_{horario}.csv'
 with open(filename, 'w', newline='', encoding='utf-8') as f:
-    writer = csv.DictWriter(f, fieldnames=['url', 'title', 'company', 'company_url',             'employment_type','experience_level', 'num_applicants', 'post_date',])
+    writer = csv.DictWriter(f, fieldnames=['url', 'titulo', 'empresa', 'url_empresa',             'tipo_contrato','experiencia', 'cadidatos', 'postado','horario'])
     writer.writeheader()
     writer.writerows(jobs_list)
 f.close()
