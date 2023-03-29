@@ -7,7 +7,11 @@ import csv
 import time
 import datetime
 
-# Nesse código foi utilizado o selenium em sua última versão e o webdriver do Chrome (No código se encontra o Firefox comentado, mas não realizei nenhum teste com ele)
+# Nesse código foi utilizado o selenium em sua última versão e o webdriver do Chrome (No código se encontra o Firefox comentado, mas não realizei nenhum teste com ele). Devido à políticas do LinkedIn que impossibilita o web scraping foi necessário colocar alguns time.sleep() as variáveis abaixo altera o valor de algum deles caso seja necessário
+
+ts1 = 2
+ts2 = 2
+ts3 = 2
 
 # Define as opções do navegador  e inicia o Google Chrome
 
@@ -44,12 +48,12 @@ country_filter.click()
 country_filter.clear()
 for char in pais:
     country_filter.send_keys(char)
-    time.sleep(0.2)
+    time.sleep(0.3)
 
-time.sleep(1)
+time.sleep(ts2)
 
 country_filter.send_keys(Keys.ENTER)
-time.sleep(1)
+time.sleep(ts1)
 
 # Adiciona filtro de setor da empresa
 department_filter = driver.find_element(By.XPATH, '//*[@id="job-search-bar-keywords"]')
@@ -59,11 +63,11 @@ for char in setor:
     department_filter.send_keys(char)
     time.sleep(0.3)
 
-time.sleep(2)
+time.sleep(ts2)
 
 # Pesquisa por país e cargo
 department_filter.send_keys(Keys.ENTER)
-time.sleep(1)
+time.sleep(ts1)
 
 # Adiciona filtro de tipo de vaga e experiência
 employment_filter = driver.find_element(By.XPATH, '//*[@id="jserp-filters"]/ul/li[4]/div/div/button')
@@ -72,17 +76,17 @@ for tipo in tipo_contratacao:
     search_employment = driver.find_element(By.XPATH, f'//*[@id="{tipo}"]')
     search_employment.click()
 
-time.sleep(1)
+time.sleep(ts2)
 driver.find_element(By.XPATH, '//*[@id="jserp-filters"]/ul/li[4]/div/div/div/button').click()
 
-time.sleep(1)
+time.sleep(ts3)
 experience_filter = driver.find_element(By.XPATH, '//*[@id="jserp-filters"]/ul/li[5]/div/div/button')
 experience_filter.click()
 for nivel in nivel_experiencia:
     search_experience = driver.find_element(By.XPATH, f'//*[@id="{nivel}"]')
     search_experience.click()
 
-time.sleep(1)
+time.sleep(ts2)
 driver.find_element(By.XPATH, '//*[@id="jserp-filters"]/ul/li[5]/div/div/div/button').click()
 
 
@@ -94,7 +98,7 @@ horario = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 while True:
     time.sleep(1)
     driver.find_element(By.XPATH, f'//*[@id="main-content"]/section/ul/li[{x}]/div/a').click()
-    time.sleep(4)
+    time.sleep(5)
     try:
         job_dict = {}
         try:
@@ -140,17 +144,17 @@ while True:
         jobs_list.append(job_dict)
     except NoSuchElementException:
         continue
-    driver.execute_script(f"window.scrollTo(0, {x*100});")
+    driver.execute_script(f"window.scrollTo(0, {x*150});")
     time.sleep(0.5)
-    if x+1 is None: # interrompe o loop se x+1 é None
-        break 
+    if x == int(driver.find_element(By.XPATH, '//*[@id="main-content"]/div/h1/span[1]').text): # interrompe o loop se x é igual ao número de vagas
+        break
 
     x += 1
 
 # Exporta os resultados para um arquivo CSV
 filename = f'scraping-Horario_{horario}.csv'
 with open(filename, 'w', newline='', encoding='utf-8') as f:
-    writer = csv.DictWriter(f, fieldnames=['url', 'titulo', 'empresa', 'url_empresa',             'tipo_contrato','experiencia', 'cadidatos', 'postado','horario'])
+    writer = csv.DictWriter(f, fieldnames=['url', 'titulo', 'empresa', 'url_empresa',             'tipo_contrato','experiencia', 'candidatos', 'postado','horario'])
     writer.writeheader()
     writer.writerows(jobs_list)
 f.close()
