@@ -1,2 +1,2 @@
 # WebScraping_LinkedIn
- Desafio para vaga de estágio.
+Web scraping de vagas no Linkedin
